@@ -1,0 +1,7 @@
+,distinct_1,distinct_1,distinct_2,distinct_2,repetition_ratio,repetition_ratio,max_repetition,max_repetition,toxicity_score,toxicity_score,generation_time,generation_time,output_length_words,output_length_words
+,mean,std,mean,std,mean,std,mean,std,mean,std,mean,std,mean,std
+config_name,,,,,,,,,,,,,,
+baseline_greedy,0.8192,0.0667,0.9759,0.0376,0.1808,0.0667,1.0333,0.1805,0.0043,0.015,0.2876,0.0128,71.6778,17.7009
+finetuned_conservative,0.569,0.1544,0.7942,0.1999,0.431,0.1544,1.6444,2.3383,0.0029,0.0095,0.2959,0.0125,79.2,17.9257
+finetuned_greedy,0.7852,0.0771,0.9681,0.0532,0.2148,0.0771,1.1889,0.5976,0.0067,0.0308,0.2864,0.0125,75.6111,12.7998
+finetuned_optimal,0.7019,0.1234,0.9318,0.0918,0.2981,0.1234,1.2222,0.8582,0.0012,0.0026,0.2989,0.0165,79.1889,16.5786

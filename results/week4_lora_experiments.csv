@@ -1,0 +1,5 @@
+experiment,rank,alpha,learning_rate,trainable_params,perplexity,validation_loss
+1,8,16,3e-5,294912,31.89,3.4622
+2,4,8,3e-5,147456,35.53,3.5704
+3,16,32,3e-5,589824,33.26,3.5045
+4,8,16,5e-5,294912,32.59,3.4839
