@@ -1,0 +1,103 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+ENV/
+env/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Machine Learning
+*.h5
+*.pkl
+*.pickle
+*.joblib
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Model Checkpoints and Outputs
+checkpoints/
+outputs/
+runs/
+wandb/
+mlruns/
+
+# Large Data Files
+*.csv
+*.json
+*.parquet
+*.feather
+data/raw/
+data/processed/
+!data/README.md
+
+# Logs
+*.log
+logs/
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Environment Variables
+.env
+.env.local
+
+# Temporary Files
+*.tmp
+temp/
+tmp/
+
+# HuggingFace Cache
+.cache/
+cache/
+
+# Weights & Biases
+wandb/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation Build
+docs/_build/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
