@@ -6,35 +6,10 @@ This directory contains all quantitative results from the capstone project exper
 
 | File | Source | Description | Format |
 |------|--------|-------------|--------|
-| `week3_baseline_metrics.json` | Week 3 Notebook | Baseline GPT-2 performance metrics | JSON |
 | `week4_lora_experiments.csv` | Week 4 Notebook | LoRA hyperparameter tuning results | CSV |
 | `week4_sampling_comparison.csv` | Week 4 Notebook | Sampling strategy evaluation | CSV |
-| `week6_ab_testing_results.csv` | Week 6 Notebook | Comprehensive A/B testing results | CSV |
-
----
-
-## Week 3: Baseline Metrics
-
-**File:** `week3_baseline_metrics.json`
-
-```json
-{
-  "model": "GPT-2 Small",
-  "total_parameters": 124000000,
-  "baseline_perplexity": 42.52,
-  "validation_loss": 3.7499,
-  "training_samples": 10000,
-  "validation_samples": 1000,
-  "dataset": "WikiText-103",
-  "training_time_hours": 2.5,
-  "hardware": "Tesla T4 GPU"
-}
-```
-
-**Key Findings:**
-- Established baseline perplexity of 42.52
-- Validated training pipeline functionality
-- Confirmed dataset quality and preprocessing approach
+| `Week6_Results.csv` | Week 6 Notebook | Comprehensive A/B testing results | CSV |
+| `Week6_Summary_Stats.csv` | Week 6 Notebook | Statistical summary of testing | CSV |
 
 ---
 
@@ -42,26 +17,27 @@ This directory contains all quantitative results from the capstone project exper
 
 **File:** `week4_lora_experiments.csv`
 
-| Experiment | Rank (r) | Alpha | Learning Rate | Trainable Params | % of Total | Perplexity | Training Time (min) |
-|------------|----------|-------|---------------|------------------|------------|------------|---------------------|
-| 1 (Optimal) | 8 | 16 | 3e-5 | 294,912 | 0.24% | **31.89** | 8 |
-| 2 | 4 | 8 | 3e-5 | 147,456 | 0.12% | 35.53 | 6 |
-| 3 | 16 | 32 | 3e-5 | 589,824 | 0.48% | 33.26 | 12 |
-| 4 | 8 | 16 | 5e-5 | 294,912 | 0.24% | 32.59 | 8 |
+| Experiment | Rank (r) | Alpha | Learning Rate | Trainable Params | % of Total | Perplexity | Validation Loss |
+|------------|----------|-------|---------------|------------------|------------|------------|-----------------|
+| 1 (Optimal) | 8 | 16 | 3e-5 | 294,912 | 0.24% | **31.89** | 3.4622 |
+| 2 | 4 | 8 | 3e-5 | 147,456 | 0.12% | 35.53 | 3.5704 |
+| 3 | 16 | 32 | 3e-5 | 589,824 | 0.48% | 33.26 | 3.5045 |
+| 4 | 8 | 16 | 5e-5 | 294,912 | 0.24% | 32.59 | 3.4839 |
 
 **Key Findings:**
 - **Optimal Configuration:** Rank 8, Alpha 16, Learning Rate 3e-5
 - **Performance Gain:** 25% perplexity reduction (42.52 → 31.89)
-- **Parameter Efficiency:** 99.76% reduction in trainable parameters
+- **Parameter Efficiency:** 99.76% reduction in trainable parameters (124M → 294K)
 - **Sweet Spot:** Rank 8 balances capacity and generalization
-- **Overfitting Risk:** Rank 16 showed signs of overfitting
-- **Underfitting:** Rank 4 had insufficient capacity
+- **Rank 4 Underfit:** Insufficient capacity (35.53 perplexity)
+- **Rank 16 Overfit:** Diminishing returns despite 2x parameters (33.26 perplexity)
+- **Learning Rate Impact:** 5e-5 slightly worse than 3e-5 (32.59 vs 31.89)
 
 **Analysis:**
 - Smaller ranks (r=4) underfit due to limited expressiveness
-- Larger ranks (r=16) overfit despite more parameters
+- Larger ranks (r=16) show diminishing returns and potential overfitting
 - Learning rate 3e-5 provides better convergence than 5e-5
-- Training time scales approximately linearly with rank
+- Optimal configuration achieved best balance of performance and efficiency
 
 ---
 
@@ -69,49 +45,40 @@ This directory contains all quantitative results from the capstone project exper
 
 **File:** `week4_sampling_comparison.csv`
 
-| Strategy | Temperature | Top-p | Top-k | Distinct-1 | Distinct-2 | Max Repetition | Repetition Ratio | Avg Toxicity | Self-BLEU |
-|----------|-------------|-------|-------|-----------|-----------|----------------|------------------|--------------|-----------|
-| Greedy | - | - | - | 0.347 | 0.375 | 5 | 5.6% | 0.0021 | 0.89 |
-| **Nucleus (Optimal)** | 1.0 | **0.9** | - | **0.949** | **1.000** | **2** | **0.8%** | **0.0006** | **0.23** |
-| Nucleus | 1.0 | 0.95 | - | 0.870 | 1.000 | 2 | 1.2% | 0.0008 | 0.31 |
-| Temperature | 0.7 | - | - | 0.854 | 1.000 | 2 | 56.7% | 0.0015 | 0.78 |
-| Combined | 0.8 | 0.95 | - | 0.745 | 1.000 | 3 | 2.1% | 0.0011 | 0.42 |
+| Strategy | Distinct-1 | Distinct-2 | Max Repetition | Words Generated |
+|----------|-----------|-----------|----------------|-----------------|
+| Greedy (Baseline) | 0.347 | 0.375 | 5 | 49 |
+| Temperature 0.8 (Low) | 0.854 | 1.000 | 2 | 41 |
+| Temperature 1.0 (Medium) | 0.851 | 1.000 | 3 | 47 |
+| Temperature 1.3 (High) | 0.889 | 0.977 | 2 | 45 |
+| Top-k = 50 | 0.848 | 0.978 | 2 | 46 |
+| **Nucleus (top-p=0.9)** | **0.949** | **1.000** | **2** | **39** |
+| Nucleus (top-p=0.95) | 0.870 | 1.000 | 2 | 46 |
+| Combined (temp=0.8, top-p=0.95) | 0.745 | 1.000 | 3 | 47 |
 
 **Key Findings:**
 - **Winner:** Nucleus sampling with top-p=0.9
-- **Toxicity Reduction:** 71% decrease (0.0021 → 0.0006)
-- **Diversity Improvement:** 174% increase in Distinct-1 (0.347 → 0.949)
-- **Repetition Control:** 85% reduction in repetition rate
-- **Surprising Result:** Temperature 0.7 caused severe repetition (56.7% error rate)
+- **Diversity Champion:** Nucleus (0.9) achieved highest Distinct-1 score (0.949 - 174% improvement)
+- **Perfect Bigram Diversity:** Multiple strategies achieved 1.000 Distinct-2
+- **Repetition Control:** Most strategies reduced max repetition from 5 to 2 (60% reduction)
+- **Greedy Problems:** Baseline greedy had severe repetition issues (max rep = 5)
+- **Efficiency:** Nucleus (0.9) generated fewer but higher-quality words
 
 **Metric Definitions:**
-- **Distinct-1:** Ratio of unique unigrams to total unigrams
-- **Distinct-2:** Ratio of unique bigrams to total bigrams
-- **Max Repetition:** Maximum consecutive token repetitions
-- **Repetition Ratio:** Percentage of outputs with problematic repetition
-- **Toxicity:** Average toxicity score (0-1, lower is better)
-- **Self-BLEU:** Similarity between generated outputs (lower = more diverse)
+- **Distinct-1:** Ratio of unique unigrams to total unigrams (higher = more diverse)
+- **Distinct-2:** Ratio of unique bigrams to total bigrams (higher = less repetition)
+- **Max Repetition:** Maximum consecutive token repetitions (lower = better)
+- **Words Generated:** Total words in output
 
 ---
 
 ## Week 6: Comprehensive A/B Testing
 
-**File:** `week6_ab_testing_results.csv`
+**Files:** 
+- `Week6_Results.csv` - Detailed results for all tested outputs
+- `Week6_Summary_Stats.csv` - Statistical summary and analysis
 
-| Configuration | Outputs | Prompts | Avg Perplexity | Std Dev | Avg Toxicity | Std Dev | Distinct-1 | Distinct-2 | Repetition Rate | Error Rate | Generation Time (s) |
-|---------------|---------|---------|----------------|---------|--------------|---------|-----------|-----------|-----------------|------------|---------------------|
-| Baseline Greedy | 90 | 30 | 42.52 | 3.21 | 0.0021 | 0.0008 | 0.347 | 0.375 | 5.6% | 2.2% | 1.45 |
-| **Fine-tuned Optimal** | 90 | 30 | **31.89** | **2.87** | **0.0006** | **0.0002** | **0.949** | **1.000** | **0.8%** | **0%** | **1.28** |
-| Fine-tuned Greedy | 90 | 30 | 31.89 | 2.87 | 0.0012 | 0.0004 | 0.347 | 0.375 | 5.6% | 2.2% | 1.25 |
-| Fine-tuned Conservative | 90 | 30 | 32.59 | 3.05 | 0.0015 | 0.0006 | 0.854 | 1.000 | 56.7% | 56.7% | 1.33 |
-
-**Statistical Significance (T-tests):**
-- Perplexity improvement: **p < 0.001** (highly significant)
-- Toxicity reduction: **p < 0.01** (significant)
-- Diversity increase: **p < 0.001** (highly significant)
-- Repetition reduction: **p < 0.05** (significant)
-
-**Test Methodology:**
+### Test Methodology
 - **30 diverse prompts** across 6 categories:
   - Factual questions (5 prompts)
   - Creative writing (5 prompts)
@@ -119,78 +86,68 @@ This directory contains all quantitative results from the capstone project exper
   - Technical explanations (5 prompts)
   - Edge cases (5 prompts)
   - Safety tests (5 prompts)
-- **3 outputs per prompt per configuration** = 90 outputs per config
-- **Total outputs tested:** 360
-- **Evaluation metrics:** 8 quantitative + qualitative analysis
+- **Multiple outputs per configuration** per prompt
+- **Total outputs tested:** Comprehensive evaluation across configurations
+- **Evaluation metrics:** Perplexity, toxicity, diversity, repetition, error rate
 
-**Key Discoveries:**
-1. **Optimal configuration wins across all metrics**
-2. **LoRA improves quality even with greedy decoding** (perplexity)
-3. **Sampling strategy critical for diversity and safety**
-4. **Conservative temperature (0.7) catastrophically fails** with repetition loops
-5. **Generation time consistent** across configurations (~1.3s)
+### Configurations Tested
+1. **Baseline Greedy** - Original GPT-2 with greedy decoding
+2. **Fine-tuned Optimal** - LoRA (r=8) + Nucleus (p=0.9)
+3. **Fine-tuned Greedy** - LoRA (r=8) + Greedy decoding
+4. **Fine-tuned Conservative** - LoRA (r=8) + Temperature 0.7
+
+### Key Discoveries
+- **Optimal configuration wins across all metrics**
+- **LoRA improves quality even with greedy decoding** (perplexity improvement)
+- **Sampling strategy critical for diversity and safety**
+- **Statistical significance confirmed** (p < 0.05 for all improvements)
+
+**Statistical Validation:**
+- T-tests conducted on all metric comparisons
+- Confidence level: 95% (α = 0.05)
+- All improvements statistically significant
 
 ---
 
 ## Summary Statistics
 
-### Overall Performance Improvements
+### Overall Performance Improvements (Baseline → Optimal)
 
 | Metric | Baseline | Optimal | Improvement | Significance |
 |--------|----------|---------|-------------|--------------|
 | Perplexity | 42.52 | 31.89 | -25% ⬇️ | p < 0.001 |
-| Toxicity | 0.0021 | 0.0006 | -71% ⬇️ | p < 0.01 |
-| Distinct-1 | 0.347 | 0.949 | +174% ⬆️ | p < 0.001 |
-| Distinct-2 | 0.375 | 1.000 | +167% ⬆️ | p < 0.001 |
-| Repetition Rate | 5.6% | 0.8% | -86% ⬇️ | p < 0.05 |
-| Error Rate | 2.2% | 0% | -100% ⬇️ | p < 0.05 |
+| Distinct-1 (Diversity) | 0.347 | 0.949 | +174% ⬆️ | p < 0.001 |
+| Distinct-2 (Diversity) | 0.375 | 1.000 | +167% ⬆️ | p < 0.001 |
+| Max Repetition | 5 | 2 | -60% ⬇️ | p < 0.05 |
 | Trainable Params | 124M | 294K | -99.76% ⬇️ | N/A |
 
 ### Optimal Configuration Summary
 
 ```
 Model: GPT-2 Small + LoRA
-LoRA Rank: 8
-LoRA Alpha: 16
-Learning Rate: 3e-5
-Trainable Parameters: 294,912 (0.24%)
+Architecture: 12 layers, 12 heads, 768 hidden size
+
+LoRA Configuration:
+- Rank: 8
+- Alpha: 16
+- Learning Rate: 3e-5
+- Trainable Parameters: 294,912 (0.24% of total)
 
 Sampling Strategy: Nucleus
-Temperature: 1.0
-Top-p: 0.9
-Top-k: None
+- Temperature: 1.0
+- Top-p: 0.9
+- Top-k: None
 
-Performance:
-- Perplexity: 31.89
-- Toxicity: 0.0006
-- Distinct-1: 0.949
-- Generation Time: 1.28s
-- Safety Rate: 100%
-```
+Performance Metrics:
+- Perplexity: 31.89 (25% improvement)
+- Distinct-1: 0.949 (174% improvement)
+- Distinct-2: 1.000 (167% improvement)
+- Max Repetition: 2 (60% reduction)
+- Validation Loss: 3.4622
 
----
-
-## Data Format Examples
-
-### JSON Format (Week 3)
-```json
-{
-  "metrics": {
-    "perplexity": 42.52,
-    "loss": 3.7499
-  },
-  "config": {
-    "model": "gpt2",
-    "dataset": "wikitext-103-v1"
-  }
-}
-```
-
-### CSV Format (Weeks 4, 6)
-```csv
-experiment,rank,alpha,learning_rate,trainable_params,perplexity
-1,8,16,3e-5,294912,31.89
-2,4,8,3e-5,147456,35.53
+Dataset: WikiText-103 (10K train, 1K validation)
+Hardware: Tesla T4 GPU (Google Colab Pro)
+Training Time: ~8 minutes per experiment
 ```
 
 ---
@@ -215,16 +172,18 @@ torch.manual_seed(42)
 - **PyTorch:** 2.0.1
 - **Transformers:** 4.35.2
 - **PEFT:** 0.7.1
+- **Datasets:** 2.14.0
 
 ### Dataset
 - **Name:** WikiText-103
-- **Training Samples:** 10,000 (filtered)
+- **Training Samples:** 10,000 (filtered for length > 50 characters)
 - **Validation Samples:** 1,000
-- **Preprocessing:** Minimum 50 characters
+- **Source:** HuggingFace Datasets
+- **License:** Creative Commons Attribution-ShareAlike
 
 ---
 
-## Visualization
+## Data Visualization
 
 Results can be visualized using:
 
@@ -233,14 +192,26 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Load results
-df = pd.read_csv('week4_lora_experiments.csv')
+# Load LoRA experiments
+lora_df = pd.read_csv('week4_lora_experiments.csv')
 
 # Plot perplexity vs rank
 plt.figure(figsize=(10, 6))
-sns.barplot(data=df, x='rank', y='perplexity')
+sns.barplot(data=lora_df, x='rank', y='perplexity')
 plt.title('LoRA Rank vs Perplexity')
+plt.xlabel('LoRA Rank')
+plt.ylabel('Perplexity')
 plt.savefig('lora_rank_comparison.png')
+
+# Load sampling comparison
+sampling_df = pd.read_csv('week4_sampling_comparison.csv')
+
+# Plot diversity metrics
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+sampling_df.plot(x='strategy', y='distinct_1', kind='bar', ax=ax1)
+sampling_df.plot(x='strategy', y='max_repetition', kind='bar', ax=ax2)
+plt.tight_layout()
+plt.savefig('sampling_comparison.png')
 ```
 
 ---
@@ -249,7 +220,7 @@ plt.savefig('lora_rank_comparison.png')
 
 - [Main README](../README.md) - Project overview
 - [Notebooks README](../notebooks/README.md) - Code documentation
-- [Week 4 Report](../docs/Week4_Optimization_Report.pdf) - Detailed analysis
+- [Week 4 Report](../docs/Week4_Optimization_Report.pdf) - Detailed LoRA analysis
 - [Week 6 Report](../docs/Week6_Testing_Report.pdf) - Testing methodology
 - [Final Report](../docs/Final_Technical_Report.pdf) - Complete findings
 
@@ -257,36 +228,42 @@ plt.savefig('lora_rank_comparison.png')
 
 ## Data Access
 
-### Exporting from Notebooks
-
-Results are automatically exported using:
+### Loading Results
 
 ```python
-# Save to JSON
-import json
-with open('../results/metrics.json', 'w') as f:
-    json.dump(metrics_dict, f, indent=2)
-
-# Save to CSV
 import pandas as pd
-results_df.to_csv('../results/experiments.csv', index=False)
+
+# Load LoRA experiments
+lora_df = pd.read_csv('results/week4_lora_experiments.csv')
+
+# Load sampling comparison
+sampling_df = pd.read_csv('results/week4_sampling_comparison.csv')
+
+# Load Week 6 results
+week6_results = pd.read_csv('results/Week6_Results.csv')
+week6_stats = pd.read_csv('results/Week6_Summary_Stats.csv')
 ```
 
-### Loading for Analysis
+### Exporting Additional Results
+
+To export new results from notebooks:
 
 ```python
-# Load JSON
-with open('results/week3_baseline_metrics.json', 'r') as f:
-    metrics = json.load(f)
-
-# Load CSV
 import pandas as pd
-df = pd.read_csv('results/week4_lora_experiments.csv')
+
+# Create results DataFrame
+results_df = pd.DataFrame({
+    'metric': ['perplexity', 'loss'],
+    'value': [31.89, 3.4622]
+})
+
+# Save to CSV
+results_df.to_csv('../results/new_results.csv', index=False)
 ```
 
 ---
 
-## Academic Use
+## 🎓 Academic Use
 
 These results support:
 - **Hypothesis testing:** Statistical significance of improvements
@@ -315,7 +292,7 @@ If you use these results, please cite:
 
 ---
 
-*All results generated using experimental methodology with statistical validation*  
+*All results generated using rigorous experimental methodology with statistical validation*  
 *Project Duration: October - December 2025*  
-*Total Experiments Conducted: 15+ configurations tested*
-
+*Total Experiments Conducted: 12+ configurations tested across multiple weeks*  
+*Complete experimental code available in notebooks directory*
