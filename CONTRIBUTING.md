@@ -241,15 +241,14 @@ Email: mgvozdenovich29927@ucumberlands.edu
 If you build upon this work, please cite:
 
 ```bibtex
-@mastersthesis{gvozdenovich2025llm,
+@techreport{gvozdenovich2025llm,
   author = {Gvozdenovich, Milica},
   title = {Optimizing Domain-Specific Text Generation: A Comparative Study 
            of Parameter-Efficient Fine-Tuning and Sampling Strategies for 
            Large Language Models},
-  school = {University of the Cumberlands},
+  institution = {University of the Cumberlands},
   year = {2025},
-  type = {Master's Thesis},
-  note = {MSAI 699 Capstone Project}
+  type = {MSAI 699 Capstone Project}
 }
 ```
 
